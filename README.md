@@ -3,8 +3,6 @@ This is pytorch version of MPE, forked from the pytorch [MPE](https://github.com
 ## LOG
 20190415:fixed bug in /bin, now this file can interact with human. 
 
-
-
 ## Instruction
 
 A simple multi-agent particle world with a continuous observation and discrete action space, along with some basic simulated physics.
@@ -44,7 +42,7 @@ Used in the paper [Multi-Agent Actor-Critic for Mixed Cooperative-Competitive En
     4) `observation()`: defines the observation space of a given agent
     5) (optional) `benchmark_data()`: provides diagnostic data for policies trained on the environment (e.g. evaluation metrics)
 
-#### Creating new environments
+### Creating new environments
 
 You can create new scenarios by implementing the first 4 functions above (`make_world()`, `reset_world()`, `reward()`, and `observation()`).
 
