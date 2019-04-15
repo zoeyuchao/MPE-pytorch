@@ -1,6 +1,6 @@
 # MPE-pytorch 
 This is pytorch version of MPE, forked from the pytorch [MPE](https://github.com/shariqiqbal2810/multiagent-particle-envs).
-## LOG:
+## LOG
 20190415:fixed bug in /bin, now this file can interact with human. 
 
 
@@ -10,7 +10,7 @@ This is pytorch version of MPE, forked from the pytorch [MPE](https://github.com
 A simple multi-agent particle world with a continuous observation and discrete action space, along with some basic simulated physics.
 Used in the paper [Multi-Agent Actor-Critic for Mixed Cooperative-Competitive Environments](https://arxiv.org/pdf/1706.02275.pdf).
 
-## Getting started:
+### Getting started
 
 - To install, `cd` into the root directory and type `pip install -e .`
 
@@ -21,7 +21,7 @@ Used in the paper [Multi-Agent Actor-Critic for Mixed Cooperative-Competitive En
 
 - To use the environments, look at the code for importing them in `make_env.py`.
 
-## Code structure
+### Code structure
 
 - `make_env.py`: contains code for importing a multiagent environment as an OpenAI Gym-like object.
 
@@ -44,11 +44,11 @@ Used in the paper [Multi-Agent Actor-Critic for Mixed Cooperative-Competitive En
     4) `observation()`: defines the observation space of a given agent
     5) (optional) `benchmark_data()`: provides diagnostic data for policies trained on the environment (e.g. evaluation metrics)
 
-### Creating new environments
+#### Creating new environments
 
 You can create new scenarios by implementing the first 4 functions above (`make_world()`, `reset_world()`, `reward()`, and `observation()`).
 
-## List of environments
+### List of environments
 
 
 | Env name in code (name in paper) |  Communication? | Competitive? | Notes |
