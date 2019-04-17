@@ -1,7 +1,9 @@
 # MPE-pytorch 
 This is pytorch version of MPE, forked from the pytorch [MPE](https://github.com/shariqiqbal2810/multiagent-particle-envs).
 ## LOG
-20190415:fixed bug in /bin, now this file can interact with human. 
+20190415：fixed bug in /bin, now this file can interact with human. 
+
+20190418：fixed environment.py, 主要是_set_action函数，还有multidiscrete文件，加了一个n参数。（连续或者离散，这个兼容性今天终于解决了，可以跑所有的环境了）
 
 ## Instruction
 
