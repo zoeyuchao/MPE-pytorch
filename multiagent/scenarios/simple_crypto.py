@@ -148,7 +148,7 @@ class Scenario(BaseScenario):
         else:
             key = world.agents[2].key
 
-        prnt = False
+        prnt = True
         # speaker
         if agent.speaker:
             if prnt:

@@ -97,6 +97,7 @@ class Viewer(object):
         arr = None
         if return_rgb_array:
             buffer = pyglet.image.get_buffer_manager().get_color_buffer()
+            print(buffer)
             image_data = buffer.get_image_data()
             arr = np.fromstring(image_data.data, dtype=np.uint8, sep='')
             # In https://github.com/openai/gym-http-api/issues/2, we

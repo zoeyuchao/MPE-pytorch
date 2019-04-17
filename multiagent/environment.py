@@ -175,9 +175,8 @@ class MultiAgentEnv(gym.Env):
     def _set_action(self, action, agent, action_space, time=None):
         agent.action.u = np.zeros(self.world.dim_p)
         agent.action.c = np.zeros(self.world.dim_c)
-
         # process action
-        # if isinstance(action_space, MultiDiscrete):
+        #if isinstance(action_space, MultiDiscrete):
         if isinstance(action_space, spaces.MultiDiscrete):
             act = []
             size = action_space.high - action_space.low + 1
@@ -188,8 +187,8 @@ class MultiAgentEnv(gym.Env):
             action = act
         else:
             action = [action]
-
         if agent.movable:
+
             # physical action
             if self.discrete_action_input:
                 agent.action.u = np.zeros(self.world.dim_p)
@@ -199,6 +198,7 @@ class MultiAgentEnv(gym.Env):
                 if action[0] == 3: agent.action.u[1] = -1.0
                 if action[0] == 4: agent.action.u[1] = +1.0
             else:
+
                 if self.force_discrete_action:
                     d = np.argmax(action[0])
                     action[0][:] = 0.0
@@ -207,20 +207,29 @@ class MultiAgentEnv(gym.Env):
                     agent.action.u[0] += action[0][1] - action[0][2]
                     agent.action.u[1] += action[0][3] - action[0][4]
                 else:
-                    agent.action.u = action[0]
+                    agent.action.u = action[0][0:2]
+
             sensitivity = 5.0
             if agent.accel is not None:
                 sensitivity = agent.accel
             agent.action.u *= sensitivity
-            action = action[1:]
+           
+            if agent.silent:
+               action = action[1:]
+            else:
+               action[0] = action[0][2:]
+
         if not agent.silent:
+
             # communication action
             if self.discrete_action_input:
                 agent.action.c = np.zeros(self.world.dim_c)
                 agent.action.c[action[0]] = 1.0
             else:
                 agent.action.c = action[0]
+
             action = action[1:]
+
         # make sure we used all elements of action
         assert len(action) == 0
 
@@ -356,6 +365,7 @@ class MultiAgentEnv(gym.Env):
                 # 新增
                 if 'agent' in entity.name:
                     self.render_geoms[e].set_color(*entity.color, alpha=0.5)
+                    
                     if not entity.silent:
                         for ci in range(self.world.dim_c):
                             color = 1 - entity.state.c[ci]
