@@ -310,6 +310,19 @@ class MultiAgentEnv(gym.Env):
 
                 else:
                     geom.set_color(*entity.color)
+                    if entity.channel is not None:
+                        dim_c = self.world.dim_c
+                        # make circles to represent communication
+                        for ci in range(dim_c):
+                            comm = rendering.make_circle(entity.size / dim_c)
+                            comm.set_color(1, 1, 1)
+                            comm.add_attr(xform)
+                            offset = rendering.Transform()
+                            comm_size = (entity.size / dim_c)
+                            offset.set_translation(ci * comm_size * 2 -
+                                                   entity.size + comm_size, 0)
+                            comm.add_attr(offset)
+                            entity_comm_geoms.append(comm)
                 geom.add_attr(xform)
                 self.render_geoms.append(geom)
                 self.render_geoms_xform.append(xform)
@@ -370,6 +383,10 @@ class MultiAgentEnv(gym.Env):
                             self.comm_geoms[e][ci].set_color(color, color, color)
                 else:
                     self.render_geoms[e].set_color(*entity.color)
+                    if entity.channel is not None:
+                        for ci in range(self.world.dim_c):
+                            color = 1 - entity.channel[ci]
+                            self.comm_geoms[e][ci].set_color(color, color, color)
 
             # render to display or array
             results.append(self.viewers[i].render(return_rgb_array = mode=='rgb_array'))
@@ -377,7 +394,81 @@ class MultiAgentEnv(gym.Env):
         # print("render_call")
 
         return results
+    '''
+    #render environment
+    def render(self, mode='human', close = True):
+        if mode == 'human':
+            alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+            message = ''
+            for agent in self.world.agents:
+                comm = []
+                for other in self.world.agents:
+                    if other is agent: continue
+                    if np.all(other.state.c == 0):
+                        word = '_'
+                    else:
+                        word = alphabet[np.argmax(other.state.c)]
+                    message += (other.name + ' to ' + agent.name + ': ' + word + '   ')
+            print(message)
+        if close:
+            # close any existic renderers
+            for i,viewer in enumerate(self.viewers):
+                if viewer is not None:
+                    viewer.close()
+                self.viewers[i] = None
+            return []
 
+
+        for i in range(len(self.viewers)):
+            # create viewers (if necessary)
+            if self.viewers[i] is None:
+                # import rendering only if we need it (and don't import for headless machines)
+                #from gym.envs.classic_control import rendering
+                from multiagent import rendering
+                self.viewers[i] = rendering.Viewer(700,700)
+
+        # create rendering geometry
+        if self.render_geoms is None:
+            # import rendering only if we need it (and don't import for headless machines)
+            #from gym.envs.classic_control import rendering
+            from multiagent import rendering
+            self.render_geoms = []
+            self.render_geoms_xform = []
+            for entity in self.world.entities:
+                geom = rendering.make_circle(entity.size)
+                xform = rendering.Transform()
+                if 'agent' in entity.name:
+                    geom.set_color(*entity.color, alpha=0.5)
+                else:
+                    geom.set_color(*entity.color)
+                geom.add_attr(xform)
+                self.render_geoms.append(geom)
+                self.render_geoms_xform.append(xform)
+
+            # add geoms to viewer
+            for viewer in self.viewers:
+                viewer.geoms = []
+                for geom in self.render_geoms:
+                    viewer.add_geom(geom)
+
+        results = []
+        for i in range(len(self.viewers)):
+            from multiagent import rendering
+            # update bounds to center around agent
+            cam_range = 1
+            if self.shared_viewer:
+                pos = np.zeros(self.world.dim_p)
+            else:
+                pos = self.agents[i].state.p_pos
+            self.viewers[i].set_bounds(pos[0]-cam_range,pos[0]+cam_range,pos[1]-cam_range,pos[1]+cam_range)
+            # update geometry positions
+            for e, entity in enumerate(self.world.entities):
+                self.render_geoms_xform[e].set_translation(*entity.state.p_pos)
+            # render to display or array
+            results.append(self.viewers[i].render(return_rgb_array = mode=='rgb_array'))
+
+        return results
+    '''
     # create receptor field locations in local coordinate frame
     def _make_receptor_locations(self, agent):
         receptor_type = 'polar'

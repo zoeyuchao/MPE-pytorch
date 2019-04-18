@@ -50,34 +50,43 @@ class Scenario(BaseScenario):
             agent.color = np.array([0.25, 0.25, 0.25])
             if agent.adversary:
                 agent.color = np.array([0.75, 0.25, 0.25])
+            if agent.speaker:
+                agent.color = np.array([0.25, 0.75, 0.25])
             agent.key = None
         # random properties for landmarks
-        color_list = [np.zeros(world.dim_c) for i in world.landmarks]
-        for i, color in enumerate(color_list):
-            color[i] += 1
-        for color, landmark in zip(color_list, world.landmarks):
-            landmark.color = color
+        for i, landmark in enumerate(world.landmarks):
+            landmark.color = np.array([0.15, 0.15, 0.15])
+       # random properties for landmarks
+        channel_list = [np.zeros(world.dim_c) for i in world.landmarks]
+        for i, channel in enumerate(channel_list):
+            channel[i] += 1
+        for channel, landmark in zip(channel_list, world.landmarks):
+            landmark.channel = channel
         # set goal landmark
         goal = np.random.choice(world.landmarks)
-        world.agents[1].color = goal.color
-        world.agents[2].key = np.random.choice(world.landmarks).color
+        world.agents[1].channel = goal.channel
+        world.agents[2].key = np.random.choice(world.landmarks).channel
 
         for agent in world.agents:
             agent.goal_a = goal
 
         # set random initial states
-        for agent in world.agents:
-            agent.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
+        for i, agent in enumerate(world.agents):
+            #agent.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
+            agent.state.p_pos = np.array([0.0, -0.5 + 1.0 / (len(world.agents) - 1 ) * i])
             agent.state.p_vel = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
         for i, landmark in enumerate(world.landmarks):
-            landmark.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
+            if landmark is goal:
+                landmark.color = np.array([0.15, 0.15, 0.75])
+            #landmark.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
+            landmark.state.p_pos = np.array([0.5, 0.5 - 0.5 / (len(world.landmarks) - 1 ) * i])
             landmark.state.p_vel = np.zeros(world.dim_p)
 
 
     def benchmark_data(self, agent, world):
         # returns data for benchmarking purposes
-        return (agent.state.c, agent.goal_a.color)
+        return (agent.state.c, agent.goal_a.channel)
 
     # return all agents that are not adversaries
     def good_listeners(self, world):
@@ -104,12 +113,12 @@ class Scenario(BaseScenario):
             if (a.state.c == np.zeros(world.dim_c)).all():
                 continue
             else:
-                good_rew -= np.sum(np.square(a.state.c - agent.goal_a.color))
+                good_rew -= np.sum(np.square(a.state.c - agent.goal_a.channel))
         for a in adversaries:
             if (a.state.c == np.zeros(world.dim_c)).all():
                 continue
             else:
-                adv_l1 = np.sum(np.square(a.state.c - agent.goal_a.color))
+                adv_l1 = np.sum(np.square(a.state.c - agent.goal_a.channel))
                 adv_rew += adv_l1
         return adv_rew + good_rew
 
@@ -117,17 +126,17 @@ class Scenario(BaseScenario):
         # Adversary (Eve) is rewarded if it can reconstruct original goal
         rew = 0
         if not (agent.state.c == np.zeros(world.dim_c)).all():
-            rew -= np.sum(np.square(agent.state.c - agent.goal_a.color))
+            rew -= np.sum(np.square(agent.state.c - agent.goal_a.channel))
         return rew
 
 
     def observation(self, agent, world):
-        # goal color
-        goal_color = np.zeros(world.dim_color)
+        # goal channel
+        goal_channel = np.zeros(world.dim_color)
         if agent.goal_a is not None:
-            goal_color = agent.goal_a.color
+            goal_channel = agent.goal_a.channel
 
-        #print('goal color in obs is {}'.format(goal_color))
+        print('goal channel in obs is {}'.format(goal_channel))
 
         # get positions of all entities in this agent's reference frame
         entity_pos = []
@@ -138,34 +147,32 @@ class Scenario(BaseScenario):
         for other in world.agents:
             if other is agent or (other.state.c is None) or not other.speaker: continue
             comm.append(other.state.c)
-
         confer = np.array([0])
-
         if world.agents[2].key is None:
             confer = np.array([1])
             key = np.zeros(world.dim_c)
-            goal_color = np.zeros(world.dim_c)
+            goal_channel = np.zeros(world.dim_c)
         else:
             key = world.agents[2].key
 
-        prnt = False#True  if train use False
+        prnt = True # if train use False
         # speaker
         if agent.speaker:
             if prnt:
                 print('speaker')
                 print(agent.state.c)
-                print(np.concatenate([goal_color] + [key] + [confer] + [np.random.randn(1)]))
-            return np.concatenate([goal_color] + [key])
+        #        print(np.concatenate([goal_channel] + [key] + [confer] + [np.random.randn(1)]))
+            return np.concatenate([goal_channel] + [key])
         # listener
         if not agent.speaker and not agent.adversary:
             if prnt:
                 print('listener')
                 print(agent.state.c)
-                print(np.concatenate([key] + comm + [confer]))
+        #        print(np.concatenate([key] + comm + [confer]))
             return np.concatenate([key] + comm)
         if not agent.speaker and agent.adversary:
             if prnt:
                 print('adversary')
                 print(agent.state.c)
-                print(np.concatenate(comm + [confer]))
+        #        print(np.concatenate(comm + [confer]))
             return np.concatenate(comm)
