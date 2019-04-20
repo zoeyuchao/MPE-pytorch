@@ -184,12 +184,16 @@ class World(object):
             n_adversaries = len([a for a in self.agents if a.adversary])
         n_good_agents = len(self.agents) - n_adversaries - n_dummies
         dummy_colors = [(0, 0, 0)] * n_dummies
-        adv_colors = sns.color_palette("OrRd_d", n_adversaries)
-        good_colors = sns.color_palette("GnBu_d", n_good_agents)
+        adv_colors = [(0.75, 0.25, 0.25)] * n_adversaries #sns.color_palette("OrRd_d", n_adversaries)
+        good_colors = [(0.25, 0.25, 0.75)] * n_good_agents#sns.color_palette("GnBu_d", n_good_agents)
         colors = dummy_colors + adv_colors + good_colors
         for color, agent in zip(colors, self.agents):
             agent.color = color
-
+    
+    # landmark color
+    def assign_landmark_colors(self):
+        for landmark in self.landmarks:
+            landmark.color = np.array([0.25, 0.25, 0.25])
     # update state of the world
     def step(self):
         # set actions for scripted agents 

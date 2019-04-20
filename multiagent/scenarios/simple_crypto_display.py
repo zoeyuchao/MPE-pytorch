@@ -46,17 +46,14 @@ class Scenario(BaseScenario):
 
     def reset_world(self, world):
         # random properties for agents
-        for i, agent in enumerate(world.agents):
-            agent.color = np.array([0.25, 0.25, 0.25])
-            if agent.adversary:
-                agent.color = np.array([0.75, 0.25, 0.25])
+        world.assign_agent_colors()
+        for agent in world.agents:
             if agent.speaker:
                 agent.color = np.array([0.25, 0.75, 0.25])
             agent.key = None
         # random properties for landmarks
-        for i, landmark in enumerate(world.landmarks):
-            landmark.color = np.array([0.15, 0.15, 0.15])
-       # random properties for landmarks
+        world.assign_landmark_colors()
+        # random properties for landmarks
         channel_list = [np.zeros(world.dim_c) for i in world.landmarks]
         for i, channel in enumerate(channel_list):
             channel[i] += 1

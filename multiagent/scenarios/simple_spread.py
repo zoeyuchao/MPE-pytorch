@@ -29,22 +29,9 @@ class Scenario(BaseScenario):
 
     def reset_world(self, world):
         # random properties for agents
-        for i, agent in enumerate(world.agents):
-            agent.color = np.array([0.35, 0.35, 0.85])
+        world.assign_agent_colors()
 
-            #if(world.dim_p == 2):
-            #	agent.state.p_pos = np.array([-0.5, -0.8 + 1.6 / (len(world.agents) - 1 ) * i])
-            #else:
-            #	agent.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
-
-        # random properties for landmarks
-        for i, landmark in enumerate(world.landmarks):
-            landmark.color = np.array([0.25, 0.25, 0.25])
-
-            #if(world.dim_p == 2):
-            #	landmark.state.p_pos = np.array([0.5, 0.8 - 1.6 / (len(world.landmarks) - 1 ) * i])
-            #else:
-            #	landmark.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
+        world.assign_landmark_colors()
 
         # set random initial states
         for agent in world.agents:
@@ -87,20 +74,10 @@ class Scenario(BaseScenario):
             dists = [np.sqrt(np.sum(np.square(a.state.p_pos - l.state.p_pos))) for a in world.agents]
             rew -= min(dists)
 
-        #for i in range(len(world.landmarks)):
-         #   dist = np.sqrt(np.sum(np.square(world.agents[i].state.p_pos - world.landmarks[i].state.p_pos)))
-            # rew -= dist
-          #  if(dist < 0.05):
-           #     rew += 15
-            #else:
-            #	rew -= dist
-
-
         if agent.collide:
             for a in world.agents:
                 if self.is_collision(a, agent):
                     rew -= 1
-                    #rew -= 15
         return rew
 
     def observation(self, agent, world):

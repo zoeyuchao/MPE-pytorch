@@ -28,11 +28,9 @@ class Scenario(BaseScenario):
         return world
 
     def reset_world(self, world):
-        train = True
+        train = False#True
         # random properties for agents
-        for i, agent in enumerate(world.agents):
-            agent.color = np.array([0.35, 0.35, 0.85])
-
+        world.assign_agent_colors()
         # random properties for landmarks
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])

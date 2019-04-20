@@ -46,7 +46,7 @@ class Scenario(BaseScenario):
 
     def reset_world(self, world):
         # random properties for agents
-        for i, agent in enumerate(world.agents):
+        for agent in world.agents:
             agent.color = np.array([0.25, 0.25, 0.25])
             if agent.adversary:
                 agent.color = np.array([0.75, 0.25, 0.25])

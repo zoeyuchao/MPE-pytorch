@@ -38,11 +38,10 @@ class Scenario(BaseScenario):
 
     def reset_world(self, world):
         # random properties for agents
-        for i, agent in enumerate(world.agents):
-            agent.color = np.array([0.35, 0.85, 0.35]) if not agent.adversary else np.array([0.85, 0.35, 0.35])
-            # random properties for landmarks
-        for i, landmark in enumerate(world.landmarks):
-            landmark.color = np.array([0.25, 0.25, 0.25])
+        world.assign_agent_colors()
+        # random properties for landmarks
+        world.assign_landmark_colors()
+        # random properties for landmarks
         # set random initial states
         for agent in world.agents:
             agent.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
