@@ -84,6 +84,10 @@ class Landmark(Entity):
 class Agent(Entity):
     def __init__(self):
         super(Agent, self).__init__()
+        # agent are adversary
+        self.adversary = False
+        # agent are dummy
+        self.dummy = False
         # agents are movable by default
         self.movable = True
         # cannot send communication signals
@@ -194,6 +198,7 @@ class World(object):
     def assign_landmark_colors(self):
         for landmark in self.landmarks:
             landmark.color = np.array([0.25, 0.25, 0.25])
+    
     # update state of the world
     def step(self):
         # set actions for scripted agents 

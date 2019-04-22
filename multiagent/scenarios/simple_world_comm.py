@@ -103,13 +103,13 @@ class Scenario(BaseScenario):
             agent.state.p_vel = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
         for i, landmark in enumerate(world.landmarks):
-            landmark.state.p_pos = np.random.uniform(-0.9, +0.9, world.dim_p)
+            landmark.state.p_pos = 0.8 * np.random.uniform(-1, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
         for i, landmark in enumerate(world.food):
-            landmark.state.p_pos = np.random.uniform(-0.9, +0.9, world.dim_p)
+            landmark.state.p_pos = 0.8 * np.random.uniform(-1, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
         for i, landmark in enumerate(world.forests):
-            landmark.state.p_pos = np.random.uniform(-0.9, +0.9, world.dim_p)
+            landmark.state.p_pos = 0.8 * np.random.uniform(-1, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
     def benchmark_data(self, agent, world):
@@ -226,7 +226,7 @@ class Scenario(BaseScenario):
     def observation(self, agent, world):
         # get positions of all entities in this agent's reference frame
         entity_pos = []
-        for entity in world.landmarks:  # world.entities:
+        for entity in world.landmarks:
             if not entity.boundary:
                 entity_pos.append(entity.state.p_pos - agent.state.p_pos)
 
@@ -241,7 +241,7 @@ class Scenario(BaseScenario):
             inf2 = True
 
         food_pos = []
-        for entity in world.food:  # world.entities:
+        for entity in world.food:
             if not entity.boundary:
                 food_pos.append(entity.state.p_pos - agent.state.p_pos)
         # communication of all other agents
@@ -253,9 +253,7 @@ class Scenario(BaseScenario):
             comm.append(other.state.c)
             oth_f1 = self.is_collision(other, world.forests[0])
             oth_f2 = self.is_collision(other, world.forests[1])
-            #if (inf1 and not oth_f2) or (inf2 and not oth_f1) or (not inf1 and not oth_f1 and not inf2 and not oth_f2) or agent.leader:  #with forest vis
             if (inf1 and oth_f1) or (inf2 and oth_f2) or (not inf1 and not oth_f1 and not inf2 and not oth_f2) or agent.leader:  #without forest vis
-            #if (in_forest == np.array([-1]) and not self.is_collision(other, world.forests[0])) or (in_forest == np.array([1]) and not self.is_collision(other, world.forests[0])) or agent.leader:
                 other_pos.append(other.state.p_pos - agent.state.p_pos)
                 if not other.adversary:
                     other_vel.append(other.state.p_vel)
@@ -280,32 +278,12 @@ class Scenario(BaseScenario):
             else:
                 prey_forest_lead.append(np.array([-1]))
 
-
-        #print(agent.adversary)
-        #print(agent.leader)
-        #print(in_forest)
-        #print(other_pos)
         comm = [world.agents[0].state.c]
-        #comm = [np.array([0, 0, 0, 0])]
-        """
-        # old setting
-        if agent.adversary:
-            #print(np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + other_vel + [in_forest] + comm).shape)
-            return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + other_vel + in_forest + comm)
-        else:
-            #print(np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + [in_forest] + other_vel).shape)
-            return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + in_forest + other_vel)
 
-        # new setting
-        """
         if agent.adversary and not agent.leader:
-            #print(np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + other_vel + [in_forest] + comm).shape)
             return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + other_vel + in_forest + comm)
         if agent.leader:
             return np.concatenate(
                 [agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + other_vel + in_forest + comm)
         else:
-            #print(np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + [in_forest] + other_vel).shape)
             return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + in_forest + other_vel)
-        #"""
-
