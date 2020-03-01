@@ -68,7 +68,7 @@ class Entity(object):
         self.state = EntityState()
         # mass
         self.initial_mass = 1.0
-        #commu channel
+        # commu channel
         self.channel = None
 
     @property
@@ -148,14 +148,14 @@ class World(object):
         return [agent for agent in self.agents if agent.action_callback is not None]
     
 
-    # 新增函数 计算world中所有entity（包括agent 和 landmarks）的距离并判断是否相撞
+    # 新增函数 计算world中所有entity（包括agent and landmarks）的距离并判断是否collide?    
     def calculate_distances(self):
         if self.cached_dist_vect is None:
             # initialize distance data structure
             self.cached_dist_vect = np.zeros((len(self.entities),
                                               len(self.entities),
                                               self.dim_p))
-            # calculate minimum distance for a collision between all entities （size相加）
+            # calculate minimum distance for a collision between all entities （size相加）            
             self.min_dists = np.zeros((len(self.entities), len(self.entities)))
             for ia, entity_a in enumerate(self.entities):
                 for ib in range(ia + 1, len(self.entities)):
@@ -164,7 +164,7 @@ class World(object):
                     self.min_dists[ia, ib] = min_dist
                     self.min_dists[ib, ia] = min_dist
 
-        # cached_dist_vect 保存了两两 entity 之间的每一维坐标差，还未计算距离
+        # cached_dist_vect 保存了两�?entity 之间的每一维坐标差，还未计算距�?        
         for ia, entity_a in enumerate(self.entities):
             for ib in range(ia + 1, len(self.entities)):
                 entity_b = self.entities[ib]
@@ -172,10 +172,10 @@ class World(object):
                 self.cached_dist_vect[ia, ib, :] = delta_pos
                 self.cached_dist_vect[ib, ia, :] = -delta_pos
 
-        # cached_dist_mag 对 cached_dist_vect 中的两两距离求平方开根，得到2维距离矩阵
+        # cached_dist_mag �?cached_dist_vect 中的两两距离求平方开根，得到2维距离矩�?        
         self.cached_dist_mag = np.linalg.norm(self.cached_dist_vect, axis=2)
 
-        # cached_collisions 是一个二维0/1矩阵，1表示两个 entity 相撞
+        # cached_collisions 是一个二�?/1矩阵�?表示两个 entity 相撞
         self.cached_collisions = (self.cached_dist_mag <= self.min_dists)
 
     # 新增函数
@@ -187,7 +187,8 @@ class World(object):
         if hasattr(self.agents[0], 'adversary'):
             n_adversaries = len([a for a in self.agents if a.adversary])
         n_good_agents = len(self.agents) - n_adversaries - n_dummies
-        dummy_colors = [(0, 0, 0)] * n_dummies
+        # r g b
+        dummy_colors = [(0.25, 0.75, 0.25)] * n_dummies
         adv_colors = [(0.75, 0.25, 0.25)] * n_adversaries #sns.color_palette("OrRd_d", n_adversaries)
         good_colors = [(0.25, 0.25, 0.75)] * n_good_agents#sns.color_palette("GnBu_d", n_good_agents)
         colors = dummy_colors + adv_colors + good_colors
@@ -224,7 +225,7 @@ class World(object):
     def apply_action_force(self, p_force):
         # set applied forces
         for i,agent in enumerate(self.agents):
-            if agent.movable:
+            if agent.movable and (not agent.adversary): # zoe 20200301 adv can not be controlled by action, just collision.
                 noise = np.random.randn(*agent.action.u.shape) * agent.u_noise if agent.u_noise else 0.0
                 # force = mass * a * action + n
                 p_force[i] = (agent.mass * agent.accel if agent.accel is not None else agent.mass) * agent.action.u + noise
@@ -254,7 +255,7 @@ class World(object):
         return p_force
 
     # integrate physical state (对所有entitiy: agent & landmark)
-    # 根据 force 和 已有速度 p_vel 计算下一次的速度 = p_vel * (1-damping) + (force / m) * dt
+    # 根据 force �?已有速度 p_vel 计算下一次的速度 = p_vel * (1-damping) + (force / m) * dt
     # 根据 p_vel 计算下一次的位置 p_pos = p_vel * dt
     def integrate_state(self, p_force):
         for i,entity in enumerate(self.entities):
