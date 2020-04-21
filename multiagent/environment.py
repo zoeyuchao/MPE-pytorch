@@ -97,7 +97,7 @@ class MultiAgentEnv(gym.Env):
         self._reset_render()
 
     # 新增 _seed 函数
-    def _seed(self, seed=None):
+    def seed(self, seed=None):
         if seed is None:
             np.random.seed(1)
         else:
