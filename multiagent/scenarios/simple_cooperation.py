@@ -110,7 +110,7 @@ class Scenario(BaseScenario):
         # TODO
         if agent.collide:
             for a in world.agents:
-                if self.is_collision(a, agent):
+                if self.is_collision(a, agent) and (not a.adversary) and (not agent.adversary):
                     rew -= 1
                     collisions += 1
         
@@ -137,7 +137,7 @@ class Scenario(BaseScenario):
 
         if agent.collide:
             for a in world.agents:
-                if self.is_collision(a, agent):
+                if self.is_collision(a, agent) and (not a.adversary) and (not agent.adversary):
                     rew -= 1
         return rew
 
@@ -145,6 +145,7 @@ class Scenario(BaseScenario):
         # get positions of all entities in this agent's reference frame
         entity_pos = []
         other_pos = []
+        # distance between adv and target
         for entity in world.landmarks:  # world.entities:
             for a in world.agents:
                 if a.adversary:
@@ -160,8 +161,8 @@ class Scenario(BaseScenario):
         
         for a in world.agents:
             if not a.adversary:
-                other_pos.append(adv_pos - a.state.p_pos)
+                other_pos.append(agent.state.p_pos - a.state.p_pos)
             # comm.append(other.state.c)
             
         # return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + comm)
-        return np.concatenate(entity_pos + other_pos)
+        return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + [adv_pos] + entity_pos + other_pos)

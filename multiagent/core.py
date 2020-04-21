@@ -106,6 +106,8 @@ class Agent(Entity):
         self.action = Action()
         # script behavior to execute
         self.action_callback = None
+        # zoe 20200420
+        self.goal = None
 
 # multi-agent world
 class World(object):
@@ -131,6 +133,13 @@ class World(object):
         self.cache_dists = False
         self.cached_dist_vect = None
         self.cached_dist_mag = None
+        # zoe 20200420
+        self.world_step = 0
+        self.num_agents = 0
+        self.num_landmarks = 0
+        self.step_unknown = 0
+        self.select_goal = 0
+        
 
     # return all entities in the world
     @property
@@ -155,7 +164,7 @@ class World(object):
             self.cached_dist_vect = np.zeros((len(self.entities),
                                               len(self.entities),
                                               self.dim_p))
-            # calculate minimum distance for a collision between all entities （size相加）            
+            # calculate minimum distance for a collision between all entities （size相加�?           
             self.min_dists = np.zeros((len(self.entities), len(self.entities)))
             for ia, entity_a in enumerate(self.entities):
                 for ib in range(ia + 1, len(self.entities)):
@@ -164,7 +173,7 @@ class World(object):
                     self.min_dists[ia, ib] = min_dist
                     self.min_dists[ib, ia] = min_dist
 
-        # cached_dist_vect 保存了两�?entity 之间的每一维坐标差，还未计算距�?        
+        # cached_dist_vect 保存了两�?entity 之间的每一维坐标差，还未计算距�?        
         for ia, entity_a in enumerate(self.entities):
             for ib in range(ia + 1, len(self.entities)):
                 entity_b = self.entities[ib]
@@ -172,10 +181,10 @@ class World(object):
                 self.cached_dist_vect[ia, ib, :] = delta_pos
                 self.cached_dist_vect[ib, ia, :] = -delta_pos
 
-        # cached_dist_mag �?cached_dist_vect 中的两两距离求平方开根，得到2维距离矩�?        
+        # cached_dist_mag �?cached_dist_vect 中的两两距离求平方开根，得到2维距离矩�?        
         self.cached_dist_mag = np.linalg.norm(self.cached_dist_vect, axis=2)
 
-        # cached_collisions 是一个二�?/1矩阵�?表示两个 entity 相撞
+        # cached_collisions 是一个二�?/1矩阵�?表示两个 entity 相撞
         self.cached_collisions = (self.cached_dist_mag <= self.min_dists)
 
     # 新增函数
@@ -202,6 +211,8 @@ class World(object):
     
     # update state of the world
     def step(self):
+        # zoe 20200420
+        self.world_step += 1
         # set actions for scripted agents 
         for agent in self.scripted_agents:
             agent.action = agent.action_callback(agent, self)
@@ -225,7 +236,7 @@ class World(object):
     def apply_action_force(self, p_force):
         # set applied forces
         for i,agent in enumerate(self.agents):
-            if agent.movable and (not agent.adversary): # zoe 20200301 adv can not be controlled by action, just collision.
+            if agent.movable:
                 noise = np.random.randn(*agent.action.u.shape) * agent.u_noise if agent.u_noise else 0.0
                 # force = mass * a * action + n
                 p_force[i] = (agent.mass * agent.accel if agent.accel is not None else agent.mass) * agent.action.u + noise
@@ -255,7 +266,7 @@ class World(object):
         return p_force
 
     # integrate physical state (对所有entitiy: agent & landmark)
-    # 根据 force �?已有速度 p_vel 计算下一次的速度 = p_vel * (1-damping) + (force / m) * dt
+    # 根据 force �?已有速度 p_vel 计算下一次的速度 = p_vel * (1-damping) + (force / m) * dt
     # 根据 p_vel 计算下一次的位置 p_pos = p_vel * dt
     def integrate_state(self, p_force):
         for i,entity in enumerate(self.entities):

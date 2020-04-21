@@ -17,6 +17,7 @@ multiagent.egg-info/top_level.txt
 multiagent/scenarios/__init__.py
 multiagent/scenarios/simple.py
 multiagent/scenarios/simple_adversary.py
+multiagent/scenarios/simple_cooperation.py
 multiagent/scenarios/simple_crypto.py
 multiagent/scenarios/simple_crypto_display.py
 multiagent/scenarios/simple_push.py
@@ -26,3 +27,4 @@ multiagent/scenarios/simple_spread.py
 multiagent/scenarios/simple_spread_avoid.py
 multiagent/scenarios/simple_tag.py
 multiagent/scenarios/simple_world_comm.py
+multiagent/scenarios/single_navigation.py
