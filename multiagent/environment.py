@@ -84,7 +84,7 @@ class MultiAgentEnv(gym.Env):
             else:
                 self.action_space.append(total_action_space[0])
             # observation space
-            obs_dim = len(observation_callback(agent, self.world))
+            obs_dim = len(observation_callback(agent, self.world, critic_full_obs=False))
             self.observation_space.append(spaces.Box(low=-np.inf, high=+np.inf, shape=(obs_dim,), dtype=np.float32))#[-inf,inf]
             agent.action.c = np.zeros(self.world.dim_c)
 
@@ -106,6 +106,7 @@ class MultiAgentEnv(gym.Env):
     # step  this is  env.step()
     def step(self, action_n):
         obs_n = []
+        obs_critic_n = []
         reward_n = []
         done_n = []
         info_n = {'n': []}
@@ -117,7 +118,12 @@ class MultiAgentEnv(gym.Env):
         self.world.step() # core.step()  
         # record observation for each agent
         for agent in self.agents:
-            obs_n.append(self._get_obs(agent))
+            if self.world.critic_full_obs:
+                obs, obs_critic = self._get_obs(agent)
+                obs_n.append(obs)
+                obs_critic_n.append(obs_critic)
+            else:
+                obs_n.append(self._get_obs(agent))
             reward_n.append(self._get_reward(agent))
             done_n.append(self._get_done(agent))
 
@@ -131,8 +137,10 @@ class MultiAgentEnv(gym.Env):
         # 新增判断
         if self.post_step_callback is not None:
             self.post_step_callback(self.world)
-        
-        return obs_n, reward_n, done_n, info_n
+        if self.world.critic_full_obs:
+            return obs_n, obs_critic_n, reward_n, done_n, info_n
+        else:
+            return obs_n, reward_n, done_n, info_n
 
     def reset(self):
         # reset world
@@ -141,10 +149,19 @@ class MultiAgentEnv(gym.Env):
         self._reset_render()
         # record observations for each agent
         obs_n = []
+        obs_critic_n = []
         self.agents = self.world.policy_agents
         for agent in self.agents:
-            obs_n.append(self._get_obs(agent))
-        return obs_n
+            if self.world.critic_full_obs:
+                obs, obs_critic = self._get_obs(agent)
+                obs_n.append(obs)
+                obs_critic_n.append(obs_critic)
+            else:
+                obs_n.append(self._get_obs(agent))
+        if self.world.critic_full_obs:
+            return obs_n, obs_critic_n
+        else:
+            return obs_n
 
     # get info used for benchmarking
     def _get_info(self, agent):
@@ -156,7 +173,7 @@ class MultiAgentEnv(gym.Env):
     def _get_obs(self, agent):
         if self.observation_callback is None:
             return np.zeros(0)
-        return self.observation_callback(agent, self.world)
+        return self.observation_callback(agent, self.world, critic_full_obs=self.world.critic_full_obs)
 
     # get dones for a particular agent
     # unused right now -- agents are allowed to go beyond the viewing screen

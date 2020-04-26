@@ -142,6 +142,7 @@ class World(object):
         self.unknown_decay = False
         self.num_reset = 0
         self.decey_episode = 0
+        self.critic_full_obs = False
         
 
     # return all entities in the world
