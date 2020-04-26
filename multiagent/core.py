@@ -139,6 +139,9 @@ class World(object):
         self.num_landmarks = 0
         self.step_unknown = 0
         self.select_goal = 0
+        self.unknown_decay = False
+        self.num_reset = 0
+        self.decey_episode = 0
         
 
     # return all entities in the world

@@ -239,6 +239,7 @@ class MultiAgentEnv(gym.Env):
 
     # render environment
     # render -> _render, 新增close
+    
     def render(self, mode='human', close=True):
     # def _render(self, mode='human', close=True):
         if close:
@@ -394,7 +395,7 @@ class MultiAgentEnv(gym.Env):
         # print("render_call")
 
         return results
-    
+
     # create receptor field locations in local coordinate frame
     def _make_receptor_locations(self, agent):
         receptor_type = 'polar'

@@ -11,6 +11,9 @@ class Scenario(BaseScenario):
         world.num_agents = args.num_agents
         world.num_landmarks = args.num_landmarks
         world.step_unknown = args.step_unknown
+        world.unknown_decay = args.unknown_decay
+        world.decay_episode = args.decay_episode
+        world.num_reset = 0
         # add agents
         world.agents = [Agent() for i in range(world.num_agents)]
         for i, agent in enumerate(world.agents):
@@ -48,6 +51,10 @@ class Scenario(BaseScenario):
         world.select_goal = np.random.randint(0, world.num_landmarks)
         world.agents[0].goal = world.landmarks[world.select_goal]
         world.world_step = 0
+        world.num_reset += 1
+        if world.unknown_decay and (world.step_unknown>1) and (world.num_reset%world.decay_episode==0):
+            world.step_unknown = world.step_unknown - 1
+        
 
     def benchmark_data(self, agent, world):
         rew = 0
@@ -100,11 +107,15 @@ class Scenario(BaseScenario):
             if other is agent: continue
             comm.append(other.state.c)
             other_pos.append(other.state.p_pos - agent.state.p_pos)
+
+        # index
+        index = np.zeros(world.num_landmarks)
         
         if world.world_step > world.step_unknown:
-            index = -1
+            index = np.zeros(world.num_landmarks)
         else:
-            index = world.select_goal
+            index = np.zeros(world.num_landmarks)
+            index[world.select_goal] = 1
             
         stable_obs = np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos)
         all_obs = np.append(index, stable_obs)
